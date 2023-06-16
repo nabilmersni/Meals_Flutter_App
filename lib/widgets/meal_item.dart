@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:meals_app/model/meal.dart';
+import 'package:meals_app/widgets/meal_item_trait.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class MealItem extends StatelessWidget {
-  const MealItem({super.key, required this.meal});
+  const MealItem({super.key, required this.meal, required this.onSelectMeal});
 
   final Meal meal;
+  final void Function() onSelectMeal;
+
+  String capitalize(String text) {
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +21,9 @@ class MealItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
       ),
       clipBehavior: Clip.hardEdge,
+      elevation: 2,
       child: InkWell(
-        onTap: () {},
+        onTap: onSelectMeal,
         child: Stack(
           children: [
             FadeInImage(
@@ -33,7 +40,7 @@ class MealItem extends StatelessWidget {
               child: Container(
                 color: Colors.black54,
                 padding:
-                    const EdgeInsets.symmetric(vertical: 6, horizontal: 44),
+                    const EdgeInsets.symmetric(vertical: 6, horizontal: 15),
                 child: Column(
                   children: [
                     Text(
@@ -51,8 +58,28 @@ class MealItem extends StatelessWidget {
                     const SizedBox(
                       height: 10,
                     ),
-                    const Row(
-                      children: [],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        MealItemTrait(
+                          icon: Icons.schedule,
+                          label: '${meal.duration} min',
+                        ),
+                        const SizedBox(
+                          width: 12,
+                        ),
+                        MealItemTrait(
+                          icon: Icons.work,
+                          label: capitalize(meal.complexity.name),
+                        ),
+                        const SizedBox(
+                          width: 12,
+                        ),
+                        MealItemTrait(
+                          icon: Icons.attach_money,
+                          label: capitalize(meal.affordability.name),
+                        ),
+                      ],
                     )
                   ],
                 ),
