@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:meals_app/data/dummy_data.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meals_app/model/meal.dart';
+import 'package:meals_app/providers/favorite_meals_provider.dart';
+import 'package:meals_app/providers/meals_provider.dart';
 import 'package:meals_app/screens/categories_screen.dart';
 import 'package:meals_app/screens/filters_screen.dart';
 import 'package:meals_app/screens/meals_screen.dart';
@@ -13,36 +15,23 @@ const kInitialFilters = {
   Filters.vegan: false
 };
 
-class TabsScreen extends StatefulWidget {
+class TabsScreen extends ConsumerStatefulWidget {
   const TabsScreen({super.key});
 
   @override
-  State<TabsScreen> createState() {
+  ConsumerState<TabsScreen> createState() {
     return _TabsScreen();
   }
 }
 
-class _TabsScreen extends State<TabsScreen> {
+class _TabsScreen extends ConsumerState<TabsScreen> {
   int _selectedPageIndex = 0;
-  final List<Meal> _favMeals = [];
   Map<Filters, bool> _selectedFilters = kInitialFilters;
 
   void _selectPage(int index) {
     setState(() {
       _selectedPageIndex = index;
     });
-  }
-
-  bool _isFavorite(Meal meal) {
-    return _favMeals.contains(meal);
-  }
-
-  void _toggleFavMeals(Meal meal) {
-    setState(
-      () {
-        _favMeals.contains(meal) ? _favMeals.remove(meal) : _favMeals.add(meal);
-      },
-    );
   }
 
   void _onSelectDrawerItem(String identifier) async {
@@ -64,7 +53,9 @@ class _TabsScreen extends State<TabsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final availableMeals = dummyMeals.where((meal) {
+    final meals = ref.watch(mealsProvider);
+    final List<Meal> favMeals = ref.watch(favMealsProvider);
+    final availableMeals = meals.where((meal) {
       if (_selectedFilters[Filters.glutenFree]! && !meal.isGlutenFree) {
         return false;
       }
@@ -82,16 +73,12 @@ class _TabsScreen extends State<TabsScreen> {
 
     Widget activePage = CategoriesScreen(
       availableMeals: availableMeals,
-      toggleFavMeals: _toggleFavMeals,
-      isFavorite: _isFavorite,
     );
     String activeTitle = 'Categories';
 
     if (_selectedPageIndex == 1) {
       activePage = MealsScreen(
-        meals: _favMeals,
-        toggleFavMeals: _toggleFavMeals,
-        isFavorite: _isFavorite,
+        meals: favMeals,
       );
       activeTitle = 'Favorites';
     }

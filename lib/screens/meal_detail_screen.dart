@@ -1,49 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meals_app/model/meal.dart';
+import 'package:meals_app/providers/favorite_meals_provider.dart';
 
-class MealDetailScreen extends StatefulWidget {
+class MealDetailScreen extends ConsumerStatefulWidget {
   const MealDetailScreen({
     super.key,
     required this.meal,
-    required this.toggleFavMeals,
-    required this.isFavorite,
   });
 
   final Meal meal;
-  final void Function(Meal meal) toggleFavMeals;
-  final bool Function(Meal meal) isFavorite;
 
   @override
-  State<StatefulWidget> createState() {
+  ConsumerState<MealDetailScreen> createState() {
     return _MealDetailScreen();
   }
 }
 
-class _MealDetailScreen extends State<MealDetailScreen> {
+class _MealDetailScreen extends ConsumerState<MealDetailScreen> {
   // bool isFavorite = widget.isFavorite(widget.meal);
-  bool isFavorite = false;
+  bool isAdded = false;
 
   @override
   void initState() {
-    isFavorite = widget.isFavorite(widget.meal);
+    isAdded = ref.read(favMealsProvider).contains(widget.meal);
     super.initState();
   }
+
+  // @override
+  // void initState() {
+  //   isFavorite = widget.isFavorite(widget.meal);
+  //   super.initState();
+  // }
 
   void _toogleFavorite() {
     setState(
       () {
-        isFavorite = !isFavorite;
+        isAdded =
+            ref.read(favMealsProvider.notifier).toggleFavoriteMeal(widget.meal);
       },
     );
-
-    widget.toggleFavMeals(widget.meal);
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: isFavorite
+        content: isAdded
             ? const Text("meal added to Favorite")
             : const Text("meal deleted from Favorite"),
-        duration: const Duration(seconds: 4),
+        duration: const Duration(seconds: 3),
         backgroundColor: Theme.of(context).colorScheme.primary,
         action: SnackBarAction(
           label: 'Cancel',
@@ -51,7 +54,9 @@ class _MealDetailScreen extends State<MealDetailScreen> {
           onPressed: () {
             setState(
               () {
-                isFavorite = !isFavorite;
+                isAdded = ref
+                    .read(favMealsProvider.notifier)
+                    .toggleFavoriteMeal(widget.meal);
               },
             );
           },
@@ -68,7 +73,7 @@ class _MealDetailScreen extends State<MealDetailScreen> {
         actions: [
           IconButton(
             onPressed: _toogleFavorite,
-            icon: isFavorite
+            icon: isAdded
                 ? const Icon(Icons.star)
                 : const Icon(Icons.star_border),
           ),
