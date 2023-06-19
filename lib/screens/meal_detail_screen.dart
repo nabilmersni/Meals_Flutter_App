@@ -92,11 +92,14 @@ class _MealDetailScreen extends ConsumerState<MealDetailScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Image.network(
-              widget.meal.imageUrl,
-              width: double.infinity,
-              height: 300,
-              fit: BoxFit.cover,
+            Hero(
+              tag: widget.meal.id,
+              child: Image.network(
+                widget.meal.imageUrl,
+                width: double.infinity,
+                height: 300,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(
               height: 15,
